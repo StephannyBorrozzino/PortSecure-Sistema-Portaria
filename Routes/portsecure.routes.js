@@ -10,7 +10,8 @@ const router = express.Router();
 
 
 // Rota para exibir formulário de cadastro (GET)
-//router.get("/cadastroDeUsuarios", portariaController.(aqui viria a sua função do controller));
+router.get("/cadastroDeUsuarios", portariaController.mostrarCadastroUsuarios);
+router.post("/cadastroDeUsuarios", portariaController.cadastrarUsuario);
 
 // Rota para registrar movimentação (POST)
 router.post("/cadastroDeRegistro", portariaController.registrarMovimentacao);

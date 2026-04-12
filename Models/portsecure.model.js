@@ -26,6 +26,13 @@ class Portaria {
         ]);
     }
 
+    static async criarUsuario(dados) {
+        const { nome_usuario, cpf_usuario } = dados;
+        const query =
+            "INSERT INTO Usuarios (nome_usuario, cpf_usuario) VALUES (?, ?)";
+        return await db.executarQuery(query, [nome_usuario, cpf_usuario]);
+    }
+
     static async readAllUsers() {
 
         console.log("Model ", "readAllUsers");
