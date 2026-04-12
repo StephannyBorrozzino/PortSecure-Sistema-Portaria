@@ -7,6 +7,13 @@ function enviarAlerta(res, mensagem, dados) {
     });
 }
 
+function enviarAlertaUsuarios(res, mensagem, dados) {
+    return res.render("cadastroUsuarios", {
+        alerta: mensagem,
+        dados: dados || {},
+    });
+}
+
 async function registrarMovimentacao(req, res) {
     try {
         var cpf = req.body.cpf;
@@ -99,17 +106,65 @@ async function registrarMovimentacao(req, res) {
     }
 }
 
-const mostrarUsuarios = (req, res) => {
+const mostrarCadastroUsuarios = (req, res) => {
+    return res.render("cadastroUsuarios", { alerta: null, dados: {} });
+};
 
-    portariaModel.readAllUsers().then((usuarios) => {
+const cadastrarUsuario = async (req, res) => {
+    try {
+        const nome = req.body.nome_usuario;
+        const cpfRaw = req.body.cpf_usuario;
+        const cpf = String(cpfRaw || "").replace(/\D/g, "");
 
+        if (!nome || !cpf) {
+            return enviarAlertaUsuarios(
+                res,
+                "Preencha nome e CPF corretamente.",
+                { nome_usuario: nome, cpf_usuario: cpfRaw },
+            );
+        }
+
+        if (cpf.length !== 11) {
+            return enviarAlertaUsuarios(
+                res,
+                "CPF deve conter exatamente 11 caracteres. Por favor, verifique o valor.",
+                { nome_usuario: nome, cpf_usuario: cpfRaw },
+            );
+        }
+
+        const usuarioExistente = await portariaModel.buscarUsuarioPorCpf(cpf);
+        if (usuarioExistente) {
+            return enviarAlertaUsuarios(
+                res,
+                "CPF já cadastrado. Use outro CPF ou verifique o usuário existente.",
+                { nome_usuario: nome, cpf_usuario: cpfRaw },
+            );
+        }
+
+        await portariaModel.criarUsuario({ nome_usuario: nome, cpf_usuario: cpf });
+
+        return res.redirect("/cadastroDeUsuarios");
+    } catch (erro) {
+        console.error("Erro ao cadastrar usuário:", erro);
+        return res.status(500).render("erro404", {
+            mensagem: "Erro ao cadastrar usuário",
+        });
+    }
+};
+
+const mostrarUsuarios = async (req, res) => {
+    try {
+        const usuarios = await portariaModel.readAllUsers();
         res.render("listaUsuarios", { title: "Listagem de Usuários", dados: usuarios });
-
-    });
-
+    } catch (erro) {
+        console.error("Erro ao buscar usuários:", erro);
+        res.status(500).render("erro404", { mensagem: "Erro ao buscar usuários" });
+    }
 };
 
 module.exports = {
     registrarMovimentacao,
+    mostrarCadastroUsuarios,
+    cadastrarUsuario,
     mostrarUsuarios,
 };
