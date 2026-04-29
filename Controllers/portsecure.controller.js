@@ -162,9 +162,28 @@ const mostrarUsuarios = async (req, res) => {
     }
 };
 
+const mostrarRegistros = async (req, res) => {
+    try {
+        const registros = await portariaModel.listarRegistros();
+
+        return res.render("listaRegistros", {
+            title: "Registros de Movimentação",
+            dados: registros
+        });
+
+    } catch (erro) {
+        console.error("Erro ao buscar registros:", erro);
+
+        return res.status(500).render("erro404", {
+            mensagem: "Erro ao buscar registros"
+        });
+    }
+};
+
 module.exports = {
     registrarMovimentacao,
     mostrarCadastroUsuarios,
     cadastrarUsuario,
     mostrarUsuarios,
+     mostrarRegistros
 };
