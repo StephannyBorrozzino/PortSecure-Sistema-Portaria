@@ -2,13 +2,6 @@ const express = require("express");
 const portariaController = require("../Controllers/portsecure.controller");
 const router = express.Router();
 
-// 💥💥💥 Família, eu ja deixei meio que pronto a rota de cada um na nav, 
-// 💥💥💥 é só vocês colocarem algo na view e escreverem a sua parte na URL pra ela abrir,
-// 💥💥💥 ou clicar nos links da nav.
-// 💥💥💥 (coloquei esses emojis pra chamar a atenção de voces 👌)
-// 💥💥💥 tirem a parte de voces do comentario pra funcionar ⬇️⬇️⬇️
-
-
 // Rota para exibir formulário de cadastro (GET)
 router.get("/cadastroDeUsuarios", portariaController.mostrarCadastroUsuarios);
 router.post("/cadastroDeUsuarios", portariaController.cadastrarUsuario);
