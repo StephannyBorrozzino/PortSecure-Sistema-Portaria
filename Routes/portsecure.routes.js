@@ -10,7 +10,7 @@ router.post("/cadastroDeUsuarios", portariaController.cadastrarUsuario);
 router.post("/cadastroDeRegistro", portariaController.registrarMovimentacao);
 
 // Rota para ver a listra de registros
-// router.get("/listaDeRegistros", portariaController.(aqui viria a sua função do controller));
+ router.get("/listaDeRegistros", portariaController.mostrarRegistros);
 
 // Rota para ver a lista de usuários
 router.get("/listaDeUsuarios", portariaController.mostrarUsuarios);

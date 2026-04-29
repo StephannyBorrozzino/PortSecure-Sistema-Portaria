@@ -42,6 +42,21 @@ class Portaria {
         return db.executarQuery(query);
 
     }
+        static async listarRegistros() {
+    const query = `
+        SELECT 
+            r.tipo,
+            r.data_hora,
+            u.nome_usuario,
+            u.cpf_usuario
+        FROM Registros r
+        INNER JOIN Usuarios u 
+            ON r.id_usuario = u.id_usuario
+        ORDER BY r.data_hora DESC
+    `;
+
+    return await db.executarQuery(query);
+}
 }
 
 module.exports = Portaria;

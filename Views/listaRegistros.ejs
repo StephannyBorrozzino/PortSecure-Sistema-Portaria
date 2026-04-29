@@ -1,15 +1,64 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-  <%- include('partials/head') %>
-
-  <body>
-    <%- include('partials/header') %>
 
     <div class="divisao-tela">
-      <!-- Div que mantem o layout das views. Coloquem o conteúdo dentro dela a partir do include do nav-->
-      <%- include('partials/nav') %>
     </div>
+<!DOCTYPE html>
+<html lang="pt-br">
+<%- include('partials/head') %>
 
-    <%- include('partials/footer') %>
-  </body>
+<body>
+<%- include('partials/header') %>
+
+<div class="divisao-tela">
+    <%- include('partials/nav') %>
+
+    <main class="conteudo-principal-listagemUsuarios">
+        <h1>Lista de Registros</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Horário</th>
+                    <th>Movimentação</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% if (dados && dados.length > 0) { %>
+                    <% dados.forEach((registro) => { %>
+                        <tr>
+                            <td><%= registro.nome_usuario %></td>
+
+                            <td>
+                                <%= registro.cpf_usuario %>
+                            </td>
+
+                            <td>
+                                <%= new Date(registro.data_hora).toLocaleString('pt-BR') %>
+                            </td>
+
+                            <td>
+                                <% if (registro.tipo === "entrada") { %>
+                                    <span style="color: green;">🟢 Entrada</span>
+                                <% } else { %>
+                                    <span style="color: red;">🔴 Saída</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="4">Nenhum registro encontrado.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </main>
+</div>
+
+<%- include('partials/footer') %>
+</body>
 </html>
+ 
