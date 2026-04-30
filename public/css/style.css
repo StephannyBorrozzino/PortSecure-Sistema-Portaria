@@ -18,6 +18,8 @@
 
 body {
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .divisao-tela {
@@ -59,7 +61,7 @@ header img {
 nav {
     background-color: var(--cor-secundaria-site);
     padding: 3vw;
-    height: auto;
+    height: 80vh;
     transition: 0.3s ease;
 }
 
@@ -103,6 +105,7 @@ footer {
     font-size: 1vw;
     justify-content: space-between;
     align-items: center;
+    margin-top: auto;
 }
 
 .divisao-de-nomes {
@@ -119,6 +122,103 @@ footer {
 
 
 /* Parte da edição do FOOTER */
+
+/* botões deletar e atualizar */
+
+.btn-deletar {
+    cursor: pointer;
+    background-color: rgb(211, 0, 0);
+    padding: 10px 14px;
+    border-radius: 7px;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    transition-duration: 0.5s;
+}
+
+.btn-deletar:hover {
+    background-color: rgb(174, 0, 0);
+}
+
+.btn-atualizar {
+    cursor: pointer;
+    background-color: rgb(0, 165, 211);
+    padding: 10px 14px;
+    border-radius: 7px;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    transition-duration: 0.5s;
+}
+
+.btn-atualizar:hover {
+    background-color: rgb(0, 128, 164);
+}
+
+/* card de atualizar */
+
+/* Fundo escuro */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Caixa do modal */
+.modal {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 500px;
+}
+
+.modal h2 {
+    color: #073c81;
+    font-size: 1.7em;
+    margin-bottom: 15px;
+}
+
+.modal input {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+}
+
+.close-btn {
+    float: right;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 25px;
+    color: #000;
+    transition-duration: 0.5s;
+}
+
+.close-btn:hover {
+    color: #4f4f4f;
+}
+
+.btn-acao-model {
+    cursor: pointer;
+    background-color: #004aad;
+    padding: 10px 14px;
+    margin-top: 10px;
+    float: right;
+    border-radius: 7px;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    transition-duration: 0.5s;
+}
+
+.btn-acao-model:hover {
+    background-color: #007bff;
+}
 
 
 /* TELA: CADASTRO DE USUÁRIOS ---------------------------------------------- */
@@ -140,11 +240,18 @@ footer {
 }
 
 .formulario-cadastro-usuarios {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.formulario-cadastro-usuarios form {
     margin: 1.5vw 2.5vw 4vw 2.5vw;
     background-color: var(--fundo-cartao);
-    border: 1px solid var(--fonte-fundo-claro);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     border-radius: 18px;
-    width: 50%;
+    width: 100%;
     min-height: 40vh;
     display: flex;
     justify-content: center;
@@ -155,7 +262,7 @@ footer {
 
 .botao-registrar-cadastroUsuarios {
     background-color: var(--botao);
-    padding: 1.2vw 9vw;
+    padding: 1.2em 9em;
     color: var(--fonte-fundo-escuro);
     border: 1px solid var(--fonte-fundo-escuro);
     font-weight: bold;
@@ -163,6 +270,9 @@ footer {
     font-size: 1.2vw;
     transition: 0.3s ease;
     margin-top: 4vh;
+
+    align-self: center;
+    width: fit-content;
 }
 
 .botao-registrar-cadastroUsuarios:hover {
@@ -208,8 +318,8 @@ footer {
 .formulario-cadastro-registro {
     margin: 1.5vw 2.5vw 4vw 2.5vw;
     background-color: var(--fundo-cartao);
-    border: 1px solid var(--fonte-fundo-claro);
     border-radius: 18px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     width: 50%;
     height: 48vh;
     display: flex;
@@ -229,6 +339,7 @@ footer {
     font-size: 1.2vw;
     transition: 0.3s ease;
     margin-top: 4vh;
+    width: 100%;
 }
 
 .botao-registrar-cadastroRegistro:hover {
@@ -242,6 +353,12 @@ footer {
 .movimento-fomulario-cadastroRegistro,
 .HorarioUsuario-fomulario-cadastroRegistro {
     margin-bottom: 1.2vw;
+}
+
+#horarioExibicao {
+    height: 5vh;
+    padding: 2px;
+    width: 11vw;
 }
 
 .nomeUsuario-fomulario-cadastroRegistro input {
@@ -281,7 +398,7 @@ input:focus {
 
 .movimentacao-registro {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
 }
 
@@ -303,6 +420,14 @@ input:focus {
 
 .correcao-posicao-entrada {
     margin-bottom: 1vh;
+}
+
+.correcao-posicao-saida {
+    margin-left: 5vh;
+}
+
+.nome-cpf-select {
+    height: 5vh;
 }
 
 .modal-backdrop {
@@ -355,13 +480,23 @@ input:focus {
 
 
 /* TELA: CADASTRO DE REGISTROS ---------------------------------------------- */
+#cpf-usuario,
+#nome-usuario {
+    height: 30px;
+    font-size: 1rem;
+    width: 23.5vw;
+}
 
+#nome-usuario {
+    width: 300px;
+}
 
 /* TELA: LISTAGEM USUARIOS ---------------------------------------------- */
 
 .conteudo-principal-listagemUsuarios {
     text-align: center;
     width: 100%;
+    background-color: var(--fundo);
 }
 
 .conteudo-principal-listagemUsuarios h1 {
