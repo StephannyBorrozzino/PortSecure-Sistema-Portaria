@@ -7,12 +7,16 @@ router.get("/cadastroDeUsuarios", portariaController.mostrarCadastroUsuarios);
 router.post("/cadastroDeUsuarios", portariaController.cadastrarUsuario);
 
 // Rota para registrar movimentação (POST)
+router.get("/cadastroDeRegistro", portariaController.mostrarCadastroRegistro);
 router.post("/cadastroDeRegistro", portariaController.registrarMovimentacao);
 
 // Rota para ver a listra de registros
- router.get("/listaDeRegistros", portariaController.mostrarRegistros);
+router.get("/listaDeRegistros", portariaController.mostrarRegistros);
+router.delete("/deletarRegistro/:id", portariaController.deletarRegistro);
 
 // Rota para ver a lista de usuários
 router.get("/listaDeUsuarios", portariaController.mostrarUsuarios);
+router.delete("/deletarUsuario/:id", portariaController.deletarUsuario);
+router.put("/atualizarUsuario/:id", portariaController.atualizarUsuario);
 
 module.exports = router;

@@ -1,113 +1,67 @@
 const portariaModel = require("../Models/portsecure.model");
 
-function enviarAlerta(res, mensagem, dados) {
-    return res.render("cadastroRegistro", {
-        alerta: mensagem,
-        dados: dados || {},
-    });
-}
-
-function enviarAlertaUsuarios(res, mensagem, dados) {
-    return res.render("cadastroUsuarios", {
-        alerta: mensagem,
-        dados: dados || {},
+function enviarAlerta(res, mensagem, dados = {}) {
+    return res.status(400).json({
+        ok: false,
+        message: mensagem,
+        dados: dados
     });
 }
 
 async function registrarMovimentacao(req, res) {
     try {
-        var cpf = req.body.cpf;
-        var movimentacao = req.body.movimentacao;
-        var horario = req.body.horario;
-        var tipoMovimentacao = null;
+        // Agora pegamos os dados da requisição como JSON
+        const { usuario_id, movimentacao, horario } = req.body;
 
-        if (movimentacao === "entrada") {
-            tipoMovimentacao = "entrada";
-        } else if (movimentacao === "saida") {
-            tipoMovimentacao = "saida";
+        // O resto da lógica de validação permanece a mesma
+        if (!usuario_id || !movimentacao || !horario) {
+            return enviarAlerta(res, "Preencha usuário, movimentação e horário corretamente.", { usuario_id, movimentacao });
         }
 
-        if (!cpf || !tipoMovimentacao || !horario) {
-            return enviarAlerta(
-                res,
-                "Preencha CPF, movimento e horário corretamente.", {
-                    nome: req.body.nome,
-                    cpf: cpf,
-                    movimentacao: movimentacao,
-                },
-            );
-        }
-
-        var usuario = await portariaModel.buscarUsuarioPorCpf(cpf);
+        var usuario = await portariaModel.buscarUsuarioPorId(usuario_id);
         if (!usuario) {
-            return enviarAlerta(
-                res,
-                "Usuário não encontrado. Cadastre o usuário primeiro.", {
-                    nome: req.body.nome,
-                    cpf: cpf,
-                    movimentacao: movimentacao,
-                },
-            );
+            return enviarAlerta(res, "Usuário não encontrado", { usuario_id, movimentacao });
         }
 
-        var ultimoRegistro = await portariaModel.buscarUltimoRegistroPorUsuario(
-            usuario.id_usuario,
-        );
-
-        if (!ultimoRegistro) {
-            if (tipoMovimentacao === "saida") {
-                return enviarAlerta(
-                    res,
-                    "Não é possível registrar saída sem antes ter registrado uma entrada.", {
-                        nome: req.body.nome,
-                        cpf: cpf,
-                        movimentacao: movimentacao,
-                    },
-                );
-            }
-        } else {
-            if (ultimoRegistro.tipo === tipoMovimentacao) {
-                var espera = "entrada";
-                if (tipoMovimentacao === "entrada") {
-                    espera = "saída";
-                }
-                return enviarAlerta(
-                    res,
-                    "Movimentação inválida. Já foi registrado " +
-                    tipoMovimentacao +
-                    " por último. Registre " +
-                    espera +
-                    " antes.", {
-                        nome: req.body.nome,
-                        cpf: cpf,
-                        movimentacao: movimentacao,
-                    },
-                );
-            }
+        var ultimoRegistro = await portariaModel.buscarUltimoRegistroPorUsuario(usuario_id);
+        if (!ultimoRegistro && movimentacao === "saida") {
+            return enviarAlerta(res, "Não é possível registrar saída sem entrada primeiro.", { usuario_id, movimentacao });
         }
 
+        if (ultimoRegistro && ultimoRegistro.tipo === movimentacao) {
+            const proximaMovimentacao = movimentacao === "entrada" ? "saída" : "entrada";
+            return enviarAlerta(res, `Erro: Você já registrou uma ${movimentacao}. Registre uma ${proximaMovimentacao} antes de registrar uma nova ${movimentacao}.`, { usuario_id, movimentacao });
+        }
+
+        // Registrando a movimentação no banco de dados
         await portariaModel.criarRegistro({
-            usuario_id: usuario.id_usuario,
-            tipo_movimentacao: tipoMovimentacao,
-            horario: horario,
+            usuario_id,
+            tipo_movimentacao: movimentacao,
+            horario
         });
 
-        return res.render("cadastroRegistro", {
-            alerta: "Movimentação registrada com sucesso para " +
-                usuario.nome_usuario +
-                ".",
-            dados: {},
-        });
+        return res.json({ ok: true }); // Retornando sucesso
     } catch (erro) {
         console.error("Erro ao registrar movimentação:", erro);
-        return res.status(500).render("erro404", {
-            mensagem: "Erro ao registrar a movimentação",
-        });
+        return res.status(500).json({ ok: false, message: "Erro ao registrar a movimentação." });
     }
 }
 
 const mostrarCadastroUsuarios = (req, res) => {
     return res.render("cadastroUsuarios", { alerta: null, dados: {} });
+};
+
+const mostrarCadastroRegistro = async (req, res) => {
+    const usuarios = await portariaModel.readAllUsers();
+
+    return res.render("cadastroRegistro", {
+        alerta: null,
+        dados: {
+            usuarios: usuarios || [],
+            cpf: "",
+            movimentacao: ""
+        }
+    });
 };
 
 const cadastrarUsuario = async (req, res) => {
@@ -117,28 +71,16 @@ const cadastrarUsuario = async (req, res) => {
         const cpf = String(cpfRaw || "").replace(/\D/g, "");
 
         if (!nome || !cpf) {
-            return enviarAlertaUsuarios(
-                res,
-                "Preencha nome e CPF corretamente.",
-                { nome_usuario: nome, cpf_usuario: cpfRaw },
-            );
+            return enviarAlerta(res, "Preencha corretamente o Nome e o CPF");
         }
 
         if (cpf.length !== 11) {
-            return enviarAlertaUsuarios(
-                res,
-                "CPF deve conter exatamente 11 caracteres. Por favor, verifique o valor.",
-                { nome_usuario: nome, cpf_usuario: cpfRaw },
-            );
+            return enviarAlerta(res, "CPF deve conter exatamente 11 caracteres. Por favor, verifique o valor.");
         }
 
         const usuarioExistente = await portariaModel.buscarUsuarioPorCpf(cpf);
         if (usuarioExistente) {
-            return enviarAlertaUsuarios(
-                res,
-                "CPF já cadastrado. Use outro CPF ou verifique o usuário existente.",
-                { nome_usuario: nome, cpf_usuario: cpfRaw },
-            );
+            return enviarAlerta(res, "CPF já cadastrado. Use outro CPF ou verifique o usuário existente.");
         }
 
         await portariaModel.criarUsuario({ nome_usuario: nome, cpf_usuario: cpf });
@@ -162,6 +104,42 @@ const mostrarUsuarios = async (req, res) => {
     }
 };
 
+async function deletarUsuario(req, res) {
+    try {
+        const id = req.params.id;
+
+        if (!id) {
+            return res.status(400).send("ID não informado");
+        }
+
+        await portariaModel.deletarUsuario(id);
+
+        return res.json({ ok: true });
+
+    } catch (erro) {
+        console.error("Erro ao deletar usuário:", erro);
+
+        return res.status(500).render("erro404", {
+            mensagem: "Erro ao deletar o usuário"
+        });
+    }
+}
+
+async function atualizarUsuario(req, res) {
+    try {
+        const id = req.params.id;
+        const { nome, cpf } = req.body;
+
+        await portariaModel.atualizarUsuario(id, nome, cpf);
+
+        return res.json({ ok: true });
+
+    } catch (erro) {
+        console.error(erro);
+        return res.status(500).json({ ok: false });
+    }
+}
+
 const mostrarRegistros = async (req, res) => {
     try {
         const registros = await portariaModel.listarRegistros();
@@ -180,10 +158,35 @@ const mostrarRegistros = async (req, res) => {
     }
 };
 
+async function deletarRegistro(req, res) {
+    try {
+        const id = req.params.id;
+
+        if (!id) {
+            return res.status(400).send("ID não informado");
+        }
+
+        await portariaModel.deletarRegistro(id);
+
+        return res.json({ ok: true });
+
+    } catch (erro) {
+        console.error("Erro ao deletar registro:", erro);
+
+        return res.status(500).render("erro404", {
+            mensagem: "Erro ao deletar o registro"
+        });
+    }
+}
+
 module.exports = {
     registrarMovimentacao,
     mostrarCadastroUsuarios,
+    mostrarCadastroRegistro,
     cadastrarUsuario,
     mostrarUsuarios,
-     mostrarRegistros
+    mostrarRegistros,
+    deletarUsuario,
+    deletarRegistro,
+    atualizarUsuario
 };

@@ -1,101 +1,100 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <%- include('partials/head') %>
+<%- include('partials/head') %>
 
   <body>
     <%- include('partials/header') %>
 
-    <div class="divisao-tela">
-      <%- include('partials/nav') %>
+      <div class="divisao-tela">
+        <%- include('partials/nav') %>
 
-      <div class="conteudo-principal-cadastroDeRegistro">
-        <h1>Cadastro de Registro</h1>
-        <div class="formulario-cadastro-registro">
-          <% if (alerta) { %>
-            <div id="modalAlerta" class="modal-backdrop show">
-              <div class="modal-card">
-                <p><%= alerta %></p>
-                <button type="button" id="modalClose">OK</button>
-              </div>
+          <div class="conteudo-principal-cadastroDeRegistro">
+            <h1>Cadastro de Registro</h1>
+            <div class="formulario-cadastro-registro">
+                  <form action="/cadastroDeRegistro" method="POST">
+                    <div class="nomeUsuario-fomulario-cadastroRegistro">
+                      <label for="nome">Nome Completo e CPF:</label>
+                      <select name="usuario_id" class="nome-cpf-select">
+                        <option value="" disabled selected>Selecione uma opção</option>
+
+                        <% dados.usuarios.forEach(usuario=> { %>
+                          <option value="<%= usuario.id_usuario %>">
+                            <%= usuario.nome_usuario %> | <%= usuario.cpf_usuario %>
+                          </option>
+                          <% }) %>
+                      </select>
+                    </div>
+
+                    <div class="HorarioUsuario-fomulario-cadastroRegistro">
+                      <label for="horarioExibicao">Horário:</label>
+                      <input type="text" id="horarioExibicao" readonly />
+                      <input type="hidden" id="horario" name="horario" required />
+                    </div>
+
+                    <div class="movimento-fomulario-cadastroRegistro">
+                      <label for="movimentacao">Movimentação:</label>
+                      <div class="movimentacao-registro">
+                        <div class="correcao-posicao-entrada">
+                          <input type="radio" id="entrada" name="movimentacao" value="entrada" required />
+                          <label for="entrada">Entrada</label>
+                        </div>
+                        <div class="correcao-posicao-saida">
+                          <input type="radio" id="saida" name="movimentacao" value="saida" required />
+                          <label for="saida">Saída</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button class="botao-registrar-cadastroRegistro" type="submit">
+                      Registrar Movimentação
+                    </button>
+                  </form>
             </div>
-          <% } %>
-          <form action="/cadastroDeRegistro" method="POST">
-            <div class="nomeUsuario-fomulario-cadastroRegistro">
-              <label for="nome">Nome Completo:</label>
-              <input
-                type="text"
-                id="nome-usuario"
-                name="nome"
-                value="<%= (dados && dados.nome) || '' %>"
-                required
-                title="Insira o nome completo do usuário cadastrado no sistema."
-              />
-            </div>
-
-            <div class="divisao-CPFeHorario">
-              <div class="CPFusuario-fomulario-cadastroRegistro">
-                <label for="id">CPF:</label>
-                <input
-                  type="number"
-                  id="cpf-usuario"
-                  name="cpf"
-                  value="<%= (dados && dados.cpf) || '' %>"
-                  required
-                  title="Insira o CPF do usuário cadastrado no sistema."
-                  class="input-number"
-                />
-              </div>
-              <div class="HorarioUsuario-fomulario-cadastroRegistro">
-                <label for="horarioExibicao">Horário:</label>
-                <input type="text" id="horarioExibicao" readonly />
-
-                <!-- Campo hidden para enviar o timestamp ao servidor -->
-                <input type="hidden" id="horario" name="horario" required />
-              </div>
-            </div>
-
-            <div class="movimento-fomulario-cadastroRegistro">
-              <label for="movimentacao">Movimentação:</label>
-              <div class="movimentacao-registro">
-                <div class="correcao-posicao-entrada">
-                  <input
-                    type="radio"
-                   id="entrada"
-                   name="movimentacao"
-                    value="entrada"
-                    <%= (dados && dados.movimentacao) === 'entrada' ? 'checked' : '' %>
-                    required
-                 />
-                  <label for="entrada">Entrada</label>
-                </div>
-
-                <div class="correcao-posicao-saida">
-                  <input
-                   type="radio"
-                   id="saida"
-                   name="movimentacao"
-                   value="saida"
-                   <%= (dados && dados.movimentacao) === 'saida' ? 'checked' : '' %>
-                   required
-                  />
-                  <label for="saida">Saída</label>
-                </div>
-              </div>
-              <button class="botao-limparRadio-cadastroRegistro" type="button" id="limparMovimentacao">
-                Limpar seleção
-              </button>
-            </div>
-
-            <button class="botao-registrar-cadastroRegistro" type="submit">
-              Registrar Movimentação
-            </button>
-          </form>
-        </div>
+          </div>
       </div>
-    </div>
 
-    <%- include('partials/footer') %>
-    <script src="/js/cadastroRegistro_horario.js"></script>
-    <script src="/js/cadastroRegistro_modal.js"></script>
+      <%- include('partials/footer') %>
+        <script src="/js/cadastroRegistro_horario.js"></script>
+        <script>
+          // Obtendo o formulário de movimentação
+          const formMovimentacao = document.querySelector('form');
+
+          formMovimentacao.addEventListener('submit', function (e) {
+            e.preventDefault(); // Impede o envio padrão do formulário
+
+            // Coletando os dados
+            const usuarioId = formMovimentacao.querySelector('select[name="usuario_id"]').value;
+            const movimentacao = formMovimentacao.querySelector('input[name="movimentacao"]:checked').value;
+            const horario = document.querySelector('#horario').value;
+
+            // Preparando os dados para o envio
+            const dados = {
+              usuario_id: usuarioId,
+              movimentacao: movimentacao,
+              horario: horario
+            };
+
+            // Enviando os dados via fetch
+            fetch('/cadastroDeRegistro', {
+              method: 'POST',  // Usando POST para registrar a movimentação
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(dados) // Convertendo os dados para JSON
+            })
+              .then(res => res.json())
+              .then(data => {
+                if (data.ok) {
+                  // Se a movimentação for registrada com sucesso, pode exibir um alerta ou recarregar a página
+                  alert('Movimentação registrada com sucesso!');
+                  location.reload();  // Recarregar a página para refletir a nova movimentação
+                } else {
+                  alert(data.message);
+                }
+              })
+              .catch(err => console.error('Erro ao enviar dados:', err));
+          });
+        </script>
   </body>
+
 </html>

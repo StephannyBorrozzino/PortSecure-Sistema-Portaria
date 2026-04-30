@@ -16,13 +16,14 @@
                                     <th>ID</th>
                                     <th>Nome Completo</th>
                                     <th>CPF</th>
+                                    <th colspan="2">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-ListagemUsuarios">
                                 <% dados.forEach((usuario, indice)=> { %>
                                     <tr>
                                         <td>
-                                            <%= indice %>
+                                            <%= usuario.id_usuario %>
                                         </td>
                                         <td>
                                             <%= usuario.nome_usuario %>
@@ -30,14 +31,113 @@
                                         <td>
                                             <%= usuario.cpf_usuario %>
                                         </td>
+                                        <td>
+                                            <button class="btn-atualizar" 
+                                                data-id="<%= usuario.id_usuario %>"
+                                                data-nome="<%= usuario.nome_usuario %>"
+                                                data-cpf="<%= usuario.cpf_usuario %>"">Atualizar</button>
+                                        </td>
+                                        <td>
+                                            <button class=" btn-deletar"
+                                                data-id="<%= usuario.id_usuario %>">Deletar</button>
+                                        </td>
                                     </tr>
                                     <% }); %>
                             </tbody>
                         </table>
                     </main>
+
+
+                    <div class="overlay" id="overlay">
+                        <div class="modal">
+                            <span class="close-btn" onclick="fecharModal()">x</span>
+
+                            <h2>Atualizar Usuário</h2>
+
+                            <form id="formAtualizar">
+                                <label>Nome:</label>
+                                <input type="text" name="nome" required>
+
+                                <label>CPF:</label>
+                                <input type="text" name="cpf" required placeholder="00000000000">
+
+                                <button type="submit" class="btn-acao-model">Atualizar</button>
+                            </form>
+
+                        </div>
+                    </div>
             </div>
 
             <%- include('partials/footer') %>
+
+                <script>
+                    document.querySelectorAll(".btn-deletar").forEach(btn => {
+                        btn.addEventListener("click", function () {
+                            const id = this.dataset.id;
+
+                            fetch(`/deletarUsuario/${id}`, {
+                                method: "DELETE"
+                            })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.ok) {
+                                        location.reload();
+                                    } else {
+                                        alert("Erro ao deletar");
+                                    }
+                                })
+                                .catch(err => console.error(err));
+                        });
+                    });
+
+
+                    document.querySelectorAll(".btn-atualizar").forEach(btn => {
+                        btn.addEventListener("click", function () {
+                            const id = this.dataset.id;
+                            const nome = this.dataset.nome;
+                            const cpf = this.dataset.cpf;
+
+                            document.querySelector("input[name='nome']").value = nome;
+                            document.querySelector("input[name='cpf']").value = cpf;
+
+                            document.querySelector("form").dataset.id = id;
+
+                            abrirModal();
+                        });
+                    });
+
+                    document.getElementById("formAtualizar").addEventListener("submit", function (e) {
+                        e.preventDefault();
+
+                        const id = this.dataset.id;
+                        const nome = document.querySelector("input[name='nome']").value;
+                        const cpf = document.querySelector("input[name='cpf']").value;
+
+                        fetch(`/atualizarUsuario/${id}`, {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ nome, cpf })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.ok) {
+                                location.reload();
+                            } else {
+                                alert("Erro ao atualizar");
+                            }
+                        });
+                    });
+
+                    function abrirModal() {
+                        document.getElementById("overlay").style.display = "flex";
+                    }
+
+                    function fecharModal() {
+                        document.getElementById("overlay").style.display = "none";
+                    }
+                </script>
     </body>
 
 </html>
